@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-native-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloud-native-app
+  template:
+    metadata:
+      labels:
+        app: cloud-native-app
+    spec:
+      containers:
+      - name: cloud-native-container
+        image: yourdockerhub/cloud-native-maven-app:latest
+        ports:
+        - containerPort: 8080
