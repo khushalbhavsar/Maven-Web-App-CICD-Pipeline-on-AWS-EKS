@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cloud-native-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: cloud-native-app
@@ -13,7 +13,7 @@ spec:
         app: cloud-native-app
     spec:
       containers:
-      - name: cloud-native-container
-        image: khushalbhavsar/cloud-native-maven-app:latest
-        ports:
-        - containerPort: 8080
+        - name: tomcat
+          image: khushalbhavsar/cloud-native-maven-app:latest
+          ports:
+            - containerPort: 8080
