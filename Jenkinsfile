@@ -34,9 +34,19 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                echo "📤 Pushing Docker image to Docker Hub..."
-                sh 'docker push khushalbhavsar/cloud-native-maven-app:latest'
-                echo "✅ Docker image pushed successfully."
+                echo "📤 Logging in to Docker Hub and pushing image..."
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push khushalbhavsar/cloud-native-maven-app:latest
+                    docker logout
+                    '''
+                }
+                echo "✅ Docker image pushed successfully to Docker Hub."
             }
         }
 
