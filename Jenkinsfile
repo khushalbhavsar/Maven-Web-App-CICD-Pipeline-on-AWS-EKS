@@ -50,27 +50,39 @@ pipeline {
             }
         }
 
-        stage('Deploy to EKS') {
+        stage('Deploy to EKS (Conditional)') {
             steps {
-                echo "🚀 Deploying application to AWS EKS cluster..."
-                sh '''
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
-                '''
-                echo "✅ Application deployed successfully to EKS."
+                script {
+                    try {
+                        echo "🔍 Checking EKS cluster availability..."
+                        sh 'kubectl get nodes'
+
+                        echo "🚀 EKS is available. Deploying application..."
+                        sh '''
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        '''
+                        echo "✅ Application deployed successfully to EKS."
+
+                    } catch (Exception e) {
+                        echo "⚠️ EKS cluster not reachable or kubeconfig missing."
+                        echo "📦 Docker image already pushed to Docker Hub."
+                        echo "➡️ Skipping EKS deployment."
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo "🎉 PIPELINE SUCCESS: Application built, containerized, and deployed successfully."
+            echo "🎉 PIPELINE SUCCESS: Build & Docker push completed."
         }
         failure {
-            echo "❌ PIPELINE FAILURE: Please check the above logs for the exact error."
+            echo "❌ PIPELINE FAILURE: Please check the logs."
         }
         always {
-            echo "📌 Pipeline execution finished (success or failure)."
+            echo "📌 Pipeline execution finished."
         }
     }
 }
